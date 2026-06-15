@@ -1,0 +1,56 @@
+# whitelist_domain.txt — Domains and URL patterns allowed through URL filtering
+# Used as a URL-type EDL in Palo Alto URL Filtering profiles (allow-list action).
+# Managed via GitOps: submit a PR to add or remove entries.
+#
+# Guidelines: https://docs.paloaltonetworks.com/advanced-url-filtering/administration/
+#             configuring-url-filtering/url-category-exceptions/guidelines-for-url-category-exceptions
+#
+# --- FORMAT RULES ---
+#
+#  1. No protocol prefix — omit http:// and https://
+#       VALID:   example.com
+#       INVALID: https://example.com
+#
+#  2. Lowercase only (firewall is case-insensitive, but this list enforces lowercase)
+#
+#  3. Max 255 characters per entry
+#
+#  4. No regular expressions — only wildcard characters * and ^ are supported
+#
+#  5. Trailing slash
+#       PAN-OS 10.2+ automatically appends / to entries that don't end in / or *.
+#       This limits matches to the domain and all its subdirectories.
+#       Add the trailing slash explicitly to document intended behaviour:
+#         example.com/       — matches example.com and all subdirectories
+#         example.com/page   — matches only that exact page
+#
+#  6. Subdomain matching — example.com and www.example.com are DISTINCT entries.
+#       To allow both, add each explicitly:
+#         example.com
+#         www.example.com
+#
+#  7. Wildcard syntax (* and ^)
+#       Wildcards must be the sole character within a token.
+#       Token separators are: . / ? & = ; +
+#
+#       * (asterisk) — matches ONE OR MORE consecutive tokens (subdomains or path segments)
+#         *.example.com         matches docs.example.com AND a.b.example.com
+#         example.com/*         matches any path under example.com
+#         mail.example.*        matches mail.example.com, mail.example.co.uk, etc.
+#
+#       ^ (caret) — matches EXACTLY ONE token
+#         ^.example.com         matches www.example.com but NOT a.b.example.com
+#         ^.^.example.com       matches exactly two subdomain levels
+#
+#       INVALID wildcard patterns (rejected by validate_edl.py):
+#         example*.com          wildcard must be sole character in token
+#         *.*.com               consecutive asterisks (performance hazard)
+#         ^.^.^.^.^.^.^.^.^.^.example.com   more than 9 consecutive carets
+#         example.com/^         caret cannot appear in the path (after /)
+#
+# One entry per line. Lines starting with # and blank lines are ignored.
+
+# ---- Example entries (replace with real values) ----
+updates.example.com
+*.internal-software.com
+software-vendor.com/downloads

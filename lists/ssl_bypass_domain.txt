@@ -1,0 +1,46 @@
+# ssl_bypass_domain.txt — Domains excluded from SSL/TLS decryption inspection
+# Used as a Domain-type EDL in Palo Alto Decryption policy (no-decrypt action).
+# Managed via GitOps: submit a PR to add or remove entries.
+#
+# Guidelines: https://docs.paloaltonetworks.com/advanced-url-filtering/administration/
+#             configuring-url-filtering/url-category-exceptions/guidelines-for-url-category-exceptions
+#
+# --- FORMAT RULES ---
+#
+#  1. Domain names only — no paths (no / after the domain), no protocol prefixes
+#       VALID:   example.com
+#       INVALID: https://example.com  |  example.com/page
+#
+#  2. Lowercase only (firewall is case-insensitive, but this list enforces lowercase)
+#
+#  3. No regular expressions — only wildcard characters * and ^ are supported
+#
+#  4. Subdomain matching — example.com and www.example.com are DISTINCT entries.
+#       To bypass decryption for both, add each explicitly:
+#         example.com
+#         www.example.com
+#
+#  5. Wildcard syntax (* and ^)
+#       Wildcards must be the sole character within a token.
+#       Token separator for domains is: .
+#
+#       * (asterisk) — matches ONE OR MORE subdomain tokens (multi-level)
+#         *.example.com         matches www.example.com AND a.b.example.com
+#         mail.example.*        matches mail.example.com, mail.example.co.uk
+#
+#       ^ (caret) — matches EXACTLY ONE subdomain token (single-level only)
+#         ^.example.com         matches www.example.com but NOT a.b.example.com
+#         ^.^.example.com       matches exactly two subdomain levels
+#
+#       INVALID wildcard patterns (rejected by validate_edl.py):
+#         example*.com          wildcard must be sole character in token
+#         *.*.com               consecutive asterisks (performance hazard)
+#         ^.^.^.^.^.^.^.^.^.^.example.com   more than 9 consecutive carets
+#
+# Common use cases: banking sites, health portals, internal apps with pinned certs
+# One entry per line. Lines starting with # and blank lines are ignored.
+
+# ---- Example entries (replace with real values) ----
+*.bankingportal.com
+healthapp.example.com
+internal-crm.example.local
